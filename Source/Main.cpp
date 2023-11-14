@@ -8,6 +8,7 @@
 
 #include <JuceHeader.h>
 #include "MainComponent.h"
+#include "SourceCode.h"
 
 //==============================================================================
 class NewProjectApplication  : public juce::JUCEApplication

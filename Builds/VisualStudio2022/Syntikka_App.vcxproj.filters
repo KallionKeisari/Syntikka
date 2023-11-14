@@ -3162,6 +3162,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\SourceCode.h">
+      <Filter>Syntikka\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MainComponent.h">
       <Filter>Syntikka\Source</Filter>
     </ClInclude>

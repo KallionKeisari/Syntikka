@@ -4,6 +4,7 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="v8G1Fx" name="Syntikka">
     <GROUP id="{05E5A7E3-B397-A75B-2814-A398DB2CC4FE}" name="Source">
+      <FILE id="F8BKoe" name="SourceCode.h" compile="0" resource="0" file="Source/SourceCode.h"/>
       <FILE id="L3FOMh" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="TqPPg6" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="g0kghX" name="MainComponent.cpp" compile="1" resource="0"
