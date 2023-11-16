@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Xj9kko" name="Syntikka" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="1" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="v8G1Fx" name="Syntikka">
     <GROUP id="{05E5A7E3-B397-A75B-2814-A398DB2CC4FE}" name="Source">
       <FILE id="F8BKoe" name="SourceCode.h" compile="0" resource="0" file="Source/SourceCode.h"/>
