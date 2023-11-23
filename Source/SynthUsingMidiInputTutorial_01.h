@@ -104,7 +104,14 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
             {
                 while (--numSamples >= 0)
                 {
-                    auto currentSample = (float) (std::sin (currentAngle) * level * tailOff);
+                    
+                    auto bphase = 2 * std::remainder(currentAngle, 1) - 1;
+                    auto sq = bphase * bphase;
+                    auto dsq = sq - z1;
+                    z1 = sq;
+                    
+                    
+                    auto currentSample = (float)(dsq * level * tailOff);
 
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -112,7 +119,7 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
                     currentAngle += angleDelta;
                     ++startSample;
 
-                    tailOff *= 0.99; // [8]
+                    tailOff *= 0.9999; // [8]
 
                     if (tailOff <= 0.005)
                     {
@@ -127,7 +134,14 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
             {
                 while (--numSamples >= 0) // [6]
                 {
-                    auto currentSample = (float) (std::sin (currentAngle) * level);
+                    auto bphase = 2 * std::remainder(currentAngle, 1) - 1;
+                    auto sq = bphase * bphase;
+                    auto dsq = sq - z1;
+                    z1 = sq;
+                    
+                    
+                    
+                    auto currentSample = (float)(dsq * level * tailOff);
 
                     for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -140,7 +154,7 @@ struct SineWaveVoice   : public juce::SynthesiserVoice
     }
 
 private:
-    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
+    double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0, z1 = 0.0;
 };
 
 //==============================================================================
