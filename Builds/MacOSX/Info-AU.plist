@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.Syntikka</string>
+    <string>com.JUCE.Syntikka</string>
     <key>CFBundleName</key>
     <string>Syntikka</string>
     <key>CFBundleDisplayName</key>
@@ -29,7 +29,7 @@
     <array>
       <dict>
         <key>name</key>
-        <string>yourcompany: Syntikka</string>
+        <string>JUCE: Syntikka</string>
         <key>description</key>
         <string>Syntikka</string>
         <key>factoryFunction</key>
@@ -37,18 +37,13 @@
         <key>manufacturer</key>
         <string>Manu</string>
         <key>type</key>
-        <string>aumu</string>
+        <string>aufx</string>
         <key>subtype</key>
-        <string>Xj9k</string>
+        <string>Jwlq</string>
         <key>version</key>
         <integer>65536</integer>
-        <key>resourceUsage</key>
-        <dict>
-          <key>network.client</key>
-          <true/>
-          <key>temporary-exception.files.all.read-write</key>
-          <true/>
-        </dict>
+        <key>sandboxSafe</key>
+        <true/>
       </dict>
     </array>
   </dict>
