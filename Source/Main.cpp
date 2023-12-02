@@ -8,6 +8,7 @@
 
 #include <JuceHeader.h>
 #include "Syntikka.h"
+#include "Oscillator.h"
 
 //==============================================================================
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
