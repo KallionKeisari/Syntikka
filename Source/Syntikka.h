@@ -77,7 +77,18 @@ public:
         filter.setResonance (0.7f);                     // [4]
         lfo.initialise ([] (float x) { return std::sin(x); }, 128);
         lfo.setFrequency (3.0f);
+
     }
+
+    void setADSRParameters(float newAttack, float newDecay, float newSustain, float newRelease) {
+        adsr.setParameters({ newAttack, newDecay, newSustain, newRelease });
+    }
+
+    // Getter methods for ADSR parameters
+    float getAttack() const { return attack; }
+    float getDecay() const { return decay; }
+    float getSustain() const { return sustain; }
+    float getRelease() const { return release; }
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
@@ -87,6 +98,7 @@ public:
 
         lfo.prepare ({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels }); // [4]
     }
+    
 
     //==============================================================================
     void noteStarted() override
@@ -99,6 +111,8 @@ public:
 
         processorChain.get<osc2Index>().setFrequency (freqHz * 1.01f, true);    // [3]
         processorChain.get<osc2Index>().setLevel (velocity);                    // [4]
+        
+        setADSRParameters(attack, decay, sustain, release);
     }
 
     //==============================================================================
@@ -155,6 +169,12 @@ private:
     //==============================================================================
     juce::HeapBlock<char> heapBlock;
     juce::dsp::AudioBlock<float> tempBlock;
+
+    juce::ADSR adsr; // Declare an ADSR envelope
+    float attack { 0.1f };
+    float decay { 0.1f };
+    float sustain { 1.0f };
+    float release { 0.5f };
 
     enum
     {
@@ -500,8 +520,27 @@ public:
     juce::MidiMessageCollector& getMidiMessageCollector() noexcept { return midiMessageCollector; }
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept        { return audioBufferQueue; }
 
+    float getAttack() const { return attack; }
+    void setAttack(float newAttack) { attack = newAttack; }
+
+    float getDecay() const { return decay; }
+    void setDecay(float newDecay) { decay = newDecay; }
+
+    float getSustain() const { return sustain; }
+    void setSustain(float newSustain) { sustain = newSustain; }
+
+    float getRelease() const { return release; }
+    void setRelease(float newRelease) { release = newRelease; }
+
 private:
     //==============================================================================
+
+    float attack = 0.1f;
+    float decay = 0.1f;
+    float sustain = 1.0f;
+    float release = 0.5f;
+
+
     class DSPTutorialAudioProcessorEditor  : public juce::AudioProcessorEditor
     {
     public:
@@ -512,6 +551,36 @@ private:
         {
             addAndMakeVisible (midiKeyboardComponent);
             addAndMakeVisible (scopeComponent);
+
+            addAndMakeVisible (attackSlider);
+            attackSlider.setSliderStyle (juce::Slider::LinearHorizontal);
+            attackSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            attackSlider.setRange (0.0, 5.0, 0.1);
+            attackSlider.setValue(dspProcessor.getAttack());
+
+            addAndMakeVisible (decaySlider);
+            decaySlider.setSliderStyle (juce::Slider::LinearHorizontal);
+            decaySlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            decaySlider.setRange (0.0, 5.0, 0.1);
+            decaySlider.setValue(dspProcessor.getDecay());
+
+            addAndMakeVisible (sustainSlider);
+            sustainSlider.setSliderStyle (juce::Slider::LinearHorizontal);
+            sustainSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            sustainSlider.setRange (0.0, 5.0, 0.1);
+            sustainSlider.setValue(dspProcessor.getSustain());
+
+            addAndMakeVisible (releaseSlider);
+            releaseSlider.setSliderStyle (juce::Slider::LinearHorizontal);
+            releaseSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            releaseSlider.setRange (0.0, 5.0, 0.1);
+            releaseSlider.setValue(dspProcessor.getRelease());
+
+            attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
+            decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
+            sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
+            releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
+
 
             setSize (400, 300);
 
@@ -538,11 +607,32 @@ private:
         {
             auto area = getLocalBounds();
             midiKeyboardComponent.setBounds (area.removeFromTop (80).reduced (8));
+            
+            // Set bounds for sliders
+            const int sliderWidth = 200;
+            const int sliderHeight = 20;
+            const int sliderMargin = 10;
+
+            attackSlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
+            area.removeFromTop(sliderMargin); // Add margin between sliders
+
+            decaySlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
+            area.removeFromTop(sliderMargin);
+
+            sustainSlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
+            area.removeFromTop(sliderMargin);
+
+            releaseSlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
         }
 
     private:
         //==============================================================================
         DSPTutorialAudioProcessor& dspProcessor;
+
+        juce::Slider attackSlider;
+        juce::Slider decaySlider;
+        juce::Slider sustainSlider;
+        juce::Slider releaseSlider;
         juce::MidiKeyboardState midiKeyboardState;
         juce::MidiKeyboardComponent midiKeyboardComponent { midiKeyboardState, juce::MidiKeyboardComponent::horizontalKeyboard };
         ScopeComponent<float> scopeComponent;
