@@ -447,11 +447,11 @@ private:
 };
 
 //==============================================================================
-class DSPTutorialAudioProcessor  : public juce::AudioProcessor
+class SynthAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    DSPTutorialAudioProcessor()
+    SynthAudioProcessor()
          : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true))
     {}
 
@@ -493,7 +493,7 @@ public:
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override
     {
-        return new DSPTutorialAudioProcessorEditor (*this);
+        return new SynthAudioProcessorEditor (*this);
     }
 
     bool hasEditor() const override                                        { return true; }
@@ -541,10 +541,10 @@ private:
     float release = 0.5f;
 
 
-    class DSPTutorialAudioProcessorEditor  : public juce::AudioProcessorEditor
+    class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
     {
     public:
-        DSPTutorialAudioProcessorEditor (DSPTutorialAudioProcessor& p)
+        SynthAudioProcessorEditor (SynthAudioProcessor& p)
             : AudioProcessorEditor (&p),
               dspProcessor (p),
               scopeComponent (dspProcessor.getAudioBufferQueue())
@@ -592,7 +592,7 @@ private:
             midiKeyboardState.addListener (&dspProcessor.getMidiMessageCollector());
         }
 
-        ~DSPTutorialAudioProcessorEditor() override
+        ~SynthAudioProcessorEditor() override
         {
             midiKeyboardState.removeListener (&dspProcessor.getMidiMessageCollector());
         }
@@ -627,7 +627,7 @@ private:
 
     private:
         //==============================================================================
-        DSPTutorialAudioProcessor& dspProcessor;
+        SynthAudioProcessor& dspProcessor;
 
         juce::Slider attackSlider;
         juce::Slider decaySlider;
@@ -637,7 +637,7 @@ private:
         juce::MidiKeyboardComponent midiKeyboardComponent { midiKeyboardState, juce::MidiKeyboardComponent::horizontalKeyboard };
         ScopeComponent<float> scopeComponent;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSPTutorialAudioProcessorEditor)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessorEditor)
     };
 
     //==============================================================================
@@ -646,5 +646,5 @@ private:
     AudioBufferQueue<float> audioBufferQueue;
     ScopeDataCollector<float> scopeDataCollector { audioBufferQueue };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSPTutorialAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)
 };
