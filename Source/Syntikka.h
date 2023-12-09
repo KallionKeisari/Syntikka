@@ -155,7 +155,7 @@ public:
             {
                 lfoUpdateCounter = lfoUpdateRate;
                 auto lfoOut = lfo.processSample (0.0f);                                 // [5]
-                auto curoffFreqHz = juce::jmap (lfoOut, -1.0f, 1.0f, 100.0f, 2000.0f);  // [6]
+                auto curoffFreqHz = juce::jmap (lfoOut, -1.0f, 1.0f, 1500.0f, 2000.0f);  // [6]
                 processorChain.get<filterIndex>().setCutoffFrequencyHz (curoffFreqHz);  // [7]
             }
         }
@@ -557,24 +557,41 @@ private:
             attackSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             attackSlider.setRange (0.0, 5.0, 0.1);
             attackSlider.setValue(dspProcessor.getAttack());
+            
+            addAndMakeVisible (attackLabel);
+            attackLabel.setText ("Attack", juce::dontSendNotification);
+            attackLabel.attachToComponent (&attackSlider, true);
+
 
             addAndMakeVisible (decaySlider);
             decaySlider.setSliderStyle (juce::Slider::LinearHorizontal);
             decaySlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             decaySlider.setRange (0.0, 5.0, 0.1);
             decaySlider.setValue(dspProcessor.getDecay());
+            
+            addAndMakeVisible (decayLabel);
+            decayLabel.setText ("Decay", juce::dontSendNotification);
+            decayLabel.attachToComponent (&decaySlider, true);
 
             addAndMakeVisible (sustainSlider);
             sustainSlider.setSliderStyle (juce::Slider::LinearHorizontal);
             sustainSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             sustainSlider.setRange (0.0, 5.0, 0.1);
             sustainSlider.setValue(dspProcessor.getSustain());
+            
+            addAndMakeVisible (sustainLabel);
+            sustainLabel.setText ("Sustain", juce::dontSendNotification);
+            sustainLabel.attachToComponent (&sustainSlider, true);
 
             addAndMakeVisible (releaseSlider);
             releaseSlider.setSliderStyle (juce::Slider::LinearHorizontal);
             releaseSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             releaseSlider.setRange (0.0, 5.0, 0.1);
             releaseSlider.setValue(dspProcessor.getRelease());
+            
+            addAndMakeVisible (releaseLabel);
+            releaseLabel.setText ("Release", juce::dontSendNotification);
+            releaseLabel.attachToComponent (&releaseSlider, true);
 
             attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
             decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
@@ -582,10 +599,10 @@ private:
             releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
 
 
-            setSize (400, 300);
+            setSize (1200, 800);
 
             auto area = getLocalBounds();
-            scopeComponent.setTopLeftPosition (0, 80);
+            scopeComponent.setTopLeftPosition (0, 200); //oletus 80
             scopeComponent.setSize (area.getWidth(), area.getHeight() - 100);
 
             midiKeyboardComponent.setMidiChannel (2);
@@ -630,9 +647,13 @@ private:
         SynthAudioProcessor& dspProcessor;
 
         juce::Slider attackSlider;
+        juce::Label  attackLabel;
         juce::Slider decaySlider;
+        juce::Label  decayLabel;
         juce::Slider sustainSlider;
+        juce::Label  sustainLabel;
         juce::Slider releaseSlider;
+        juce::Label  releaseLabel;
         juce::MidiKeyboardState midiKeyboardState;
         juce::MidiKeyboardComponent midiKeyboardComponent { midiKeyboardState, juce::MidiKeyboardComponent::horizontalKeyboard };
         ScopeComponent<float> scopeComponent;
