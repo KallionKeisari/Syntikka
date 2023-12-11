@@ -79,23 +79,44 @@ public:
         lfo.setFrequency (3.0f);
 
     }
-
-    void setADSRParameters(float newAttack, float newDecay, float newSustain, float newRelease) {
+    
+    float attack { 0.1f };
+    float decay { 0.1f };
+    float sustain { 1.0f };
+    float release { 1.0f };
+    
+    /*void setADSRParameters(float newAttack, float newDecay, float newSustain, float newRelease) {
         adsr.setParameters({ newAttack, newDecay, newSustain, newRelease });
-    }
-
-    // Getter methods for ADSR parameters
+    }*/
+    
+    
     float getAttack() const { return attack; }
+    void setAttack(float newAttack) { attack = newAttack; }
+
+    float getDecay() const { return decay; }
+    void setDecay(float newDecay) { decay = newDecay; }
+
+    float getSustain() const { return sustain; }
+    void setSustain(float newSustain) { sustain = newSustain; }
+
+    float getRelease() const { return release; }
+    void setRelease(float newRelease) { release = newRelease; }
+    // Getter methods for ADSR parameters
+    /*float getAttack() const { return attack; }
     float getDecay() const { return decay; }
     float getSustain() const { return sustain; }
-    float getRelease() const { return release; }
+    float getRelease() const { return release; }*/
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
+        
+        
         tempBlock = juce::dsp::AudioBlock<float> (heapBlock, spec.numChannels, spec.maximumBlockSize);
+        adsr.setSampleRate(spec.sampleRate);
+        adsr.setParameters(juce::ADSR::Parameters(attack, decay, sustain, release));
         processorChain.prepare (spec);
-
+        //audioBuffer.setSize(spec.numChannels, spec.maximumBlockSize);
         lfo.prepare ({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels }); // [4]
     }
     
@@ -112,7 +133,11 @@ public:
         processorChain.get<osc2Index>().setFrequency (freqHz * 1.01f, true);    // [3]
         processorChain.get<osc2Index>().setLevel (velocity);                    // [4]
         
-        setADSRParameters(attack, decay, sustain, release);
+        //setADSRParameters(attack, decay, sustain, release);
+        adsr.setParameters({attack, decay, sustain, release});
+        adsr.noteOn();
+        
+        
     }
 
     //==============================================================================
@@ -126,7 +151,8 @@ public:
     //==============================================================================
     void noteStopped (bool) override
     {
-        clearCurrentNote();
+        //clearCurrentNote();
+        adsr.noteOff();
     }
 
     //==============================================================================
@@ -139,6 +165,12 @@ public:
     {
         auto output = tempBlock.getSubBlock (0, (size_t) numSamples);
         output.clear();
+        
+        if(isActive() && adsr.isActive() == false)
+            {
+                clearCurrentNote();
+                return;
+            }
 
         for (size_t pos = 0; pos < (size_t) numSamples;)
         {
@@ -147,6 +179,8 @@ public:
 
             juce::dsp::ProcessContextReplacing<float> context (block);
             processorChain.process (context);
+        
+            
 
             pos += max;
             lfoUpdateCounter -= max;
@@ -159,11 +193,18 @@ public:
                 processorChain.get<filterIndex>().setCutoffFrequencyHz (curoffFreqHz);  // [7]
             }
         }
-
+        
+        
         juce::dsp::AudioBlock<float> (outputBuffer)
             .getSubBlock ((size_t) startSample, (size_t) numSamples)
             .add (tempBlock);
+        
+        adsr.applyEnvelopeToBuffer(outputBuffer, startSample, numSamples);
+       
+
     }
+    
+    
 
 private:
     //==============================================================================
@@ -171,11 +212,12 @@ private:
     juce::dsp::AudioBlock<float> tempBlock;
 
     juce::ADSR adsr; // Declare an ADSR envelope
-    float attack { 0.1f };
+    /*float attack { 0.1f };
     float decay { 0.1f };
     float sustain { 1.0f };
-    float release { 0.5f };
+    float release { 1000000.0f };*/
 
+    
     enum
     {
         osc1Index,
@@ -519,8 +561,9 @@ public:
     //==============================================================================
     juce::MidiMessageCollector& getMidiMessageCollector() noexcept { return midiMessageCollector; }
     AudioBufferQueue<float>& getAudioBufferQueue() noexcept        { return audioBufferQueue; }
-
-    float getAttack() const { return attack; }
+    
+    
+    /*float getAttack() const { return attack; }
     void setAttack(float newAttack) { attack = newAttack; }
 
     float getDecay() const { return decay; }
@@ -530,44 +573,59 @@ public:
     void setSustain(float newSustain) { sustain = newSustain; }
 
     float getRelease() const { return release; }
-    void setRelease(float newRelease) { release = newRelease; }
+    void setRelease(float newRelease) { release = newRelease; }*/
 
 private:
     //==============================================================================
 
-    float attack = 0.1f;
+    /*float attack = 0.1f;
     float decay = 0.1f;
     float sustain = 1.0f;
-    float release = 0.5f;
+    float release = 1000000.0f;*/
 
 
     class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
     {
     public:
+        
+        /*void changeAttack(Voice& , float newAttack){
+            
+        };*/
         SynthAudioProcessorEditor (SynthAudioProcessor& p)
             : AudioProcessorEditor (&p),
               dspProcessor (p),
               scopeComponent (dspProcessor.getAudioBufferQueue())
+        
+        
+        /*Voice (Voice& p)
+            : Voicee (&p),
+              voice (p),
+              scopeComponent (dspProcessor.getAudioBufferQueue())*/
+        
         {
             addAndMakeVisible (midiKeyboardComponent);
             addAndMakeVisible (scopeComponent);
+            
 
             addAndMakeVisible (attackSlider);
             attackSlider.setSliderStyle (juce::Slider::LinearHorizontal);
-            attackSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            attackSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 100, 20);
             attackSlider.setRange (0.0, 5.0, 0.1);
-            attackSlider.setValue(dspProcessor.getAttack());
+            attackSlider.setTextValueSuffix(" *fs");
+            //attackSlider.setValue(Voice.getAttack());
+            //attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
             
             addAndMakeVisible (attackLabel);
             attackLabel.setText ("Attack", juce::dontSendNotification);
             attackLabel.attachToComponent (&attackSlider, true);
 
-
+/*
             addAndMakeVisible (decaySlider);
             decaySlider.setSliderStyle (juce::Slider::LinearHorizontal);
             decaySlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             decaySlider.setRange (0.0, 5.0, 0.1);
             decaySlider.setValue(dspProcessor.getDecay());
+            decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
             
             addAndMakeVisible (decayLabel);
             decayLabel.setText ("Decay", juce::dontSendNotification);
@@ -576,8 +634,9 @@ private:
             addAndMakeVisible (sustainSlider);
             sustainSlider.setSliderStyle (juce::Slider::LinearHorizontal);
             sustainSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
-            sustainSlider.setRange (0.0, 5.0, 0.1);
+            sustainSlider.setRange (0.1, 1.0, 0.1);
             sustainSlider.setValue(dspProcessor.getSustain());
+            sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
             
             addAndMakeVisible (sustainLabel);
             sustainLabel.setText ("Sustain", juce::dontSendNotification);
@@ -588,21 +647,34 @@ private:
             releaseSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             releaseSlider.setRange (0.0, 5.0, 0.1);
             releaseSlider.setValue(dspProcessor.getRelease());
+            releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
             
             addAndMakeVisible (releaseLabel);
             releaseLabel.setText ("Release", juce::dontSendNotification);
             releaseLabel.attachToComponent (&releaseSlider, true);
+            
+            addAndMakeVisible(filterSlider);
+            filterSlider.setSliderStyle (juce::Slider::LinearHorizontal);
+            filterSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            filterSlider.setRange(0.0, 5.0, 0.1);
+            filterSlider.setTextValueSuffix("Hz");
+            filterSlider.onValueChange = [this] {
+                dspProcessor.setAttack(filterSlider.getValue()); };
+            
+            addAndMakeVisible(filterLabel);
+            filterLabel.setText ("Filter", juce::dontSendNotification);
+            filterLabel.attachToComponent (&filterSlider, true); */
 
-            attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
-            decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
-            sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
-            releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
+            //attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
+            //decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
+            //sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
+            //releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
 
 
             setSize (1200, 800);
 
             auto area = getLocalBounds();
-            scopeComponent.setTopLeftPosition (0, 200); //oletus 80
+            scopeComponent.setTopLeftPosition (0, 220); //oletus 80
             scopeComponent.setSize (area.getWidth(), area.getHeight() - 100);
 
             midiKeyboardComponent.setMidiChannel (2);
@@ -623,7 +695,7 @@ private:
         void resized() override
         {
             auto area = getLocalBounds();
-            midiKeyboardComponent.setBounds (area.removeFromTop (80).reduced (8));
+            midiKeyboardComponent.setBounds (area.removeFromTop (100).reduced (8));
             
             // Set bounds for sliders
             const int sliderWidth = 200;
@@ -646,6 +718,8 @@ private:
         //==============================================================================
         SynthAudioProcessor& dspProcessor;
 
+        juce::Slider filterSlider;
+        juce::Label  filterLabel;
         juce::Slider attackSlider;
         juce::Label  attackLabel;
         juce::Slider decaySlider;
