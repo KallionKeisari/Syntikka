@@ -586,6 +586,7 @@ private:
 
     class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
     {
+        friend class Voice;
     public:
         
         /*void changeAttack(Voice& , float newAttack){
@@ -611,7 +612,7 @@ private:
             attackSlider.setSliderStyle (juce::Slider::LinearHorizontal);
             attackSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 100, 20);
             attackSlider.setRange (0.0, 5.0, 0.1);
-            attackSlider.setTextValueSuffix(" *fs");
+            attackSlider.setTextValueSuffix(" * fs");
             //attackSlider.setValue(Voice.getAttack());
             //attackSlider.onValueChange = [this] { dspProcessor.setAttack(attackSlider.getValue()); };
             
@@ -619,13 +620,14 @@ private:
             attackLabel.setText ("Attack", juce::dontSendNotification);
             attackLabel.attachToComponent (&attackSlider, true);
 
-/*
+
             addAndMakeVisible (decaySlider);
             decaySlider.setSliderStyle (juce::Slider::LinearHorizontal);
-            decaySlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            decaySlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 100, 20);
             decaySlider.setRange (0.0, 5.0, 0.1);
-            decaySlider.setValue(dspProcessor.getDecay());
-            decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
+            decaySlider.setTextValueSuffix(" * fs");
+            //decaySlider.setValue(dspProcessor.getDecay());
+            //decaySlider.onValueChange = [this] { dspProcessor.setDecay(decaySlider.getValue()); };
             
             addAndMakeVisible (decayLabel);
             decayLabel.setText ("Decay", juce::dontSendNotification);
@@ -633,10 +635,11 @@ private:
 
             addAndMakeVisible (sustainSlider);
             sustainSlider.setSliderStyle (juce::Slider::LinearHorizontal);
-            sustainSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            sustainSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 100, 20);
             sustainSlider.setRange (0.1, 1.0, 0.1);
-            sustainSlider.setValue(dspProcessor.getSustain());
-            sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
+            sustainSlider.setTextValueSuffix(" * fs");
+            //sustainSlider.setValue(dspProcessor.getSustain());
+            //sustainSlider.onValueChange = [this] { dspProcessor.setSustain(sustainSlider.getValue()); };
             
             addAndMakeVisible (sustainLabel);
             sustainLabel.setText ("Sustain", juce::dontSendNotification);
@@ -644,22 +647,23 @@ private:
 
             addAndMakeVisible (releaseSlider);
             releaseSlider.setSliderStyle (juce::Slider::LinearHorizontal);
-            releaseSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
+            releaseSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 100, 20);
             releaseSlider.setRange (0.0, 5.0, 0.1);
-            releaseSlider.setValue(dspProcessor.getRelease());
-            releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
+            releaseSlider.setTextValueSuffix(" * fs");
+            //releaseSlider.setValue(dspProcessor.getRelease());
+            //releaseSlider.onValueChange = [this] { dspProcessor.setRelease(releaseSlider.getValue()); };
             
             addAndMakeVisible (releaseLabel);
             releaseLabel.setText ("Release", juce::dontSendNotification);
             releaseLabel.attachToComponent (&releaseSlider, true);
             
-            addAndMakeVisible(filterSlider);
+            /*addAndMakeVisible(filterSlider);
             filterSlider.setSliderStyle (juce::Slider::LinearHorizontal);
             filterSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 20);
             filterSlider.setRange(0.0, 5.0, 0.1);
             filterSlider.setTextValueSuffix("Hz");
-            filterSlider.onValueChange = [this] {
-                dspProcessor.setAttack(filterSlider.getValue()); };
+            //filterSlider.onValueChange = [this] {
+             //   dspProcessor.setAttack(filterSlider.getValue()); };
             
             addAndMakeVisible(filterLabel);
             filterLabel.setText ("Filter", juce::dontSendNotification);
@@ -712,6 +716,8 @@ private:
             area.removeFromTop(sliderMargin);
 
             releaseSlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
+            
+            filterSlider.setBounds(area.removeFromTop(sliderHeight).withSizeKeepingCentre(sliderWidth, sliderHeight));
         }
 
     private:
